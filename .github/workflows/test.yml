@@ -150,7 +150,7 @@ jobs:
 
         # Clean up
         cd ..
-        rmdir /s /q temp-rn-project
+        Remove-Item -Recurse -Force temp-rn-project
 
   publish-test:
     runs-on: ubuntu-latest
