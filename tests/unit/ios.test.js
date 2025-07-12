@@ -2,6 +2,11 @@ import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { updateIOSVersions } from '../../src/utils/ios.js';
 import { createMockProject, createTempDir, readFile } from '../helpers/mockProject.js';
 
+// Add this helper function at the top of the file
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
 describe('iOS Version Updates', () => {
   let tempDir, cleanup;
 
@@ -212,7 +217,7 @@ describe('iOS Version Updates', () => {
 
       expect(currentProjectVersionChange).toEqual({
         platform: 'iOS',
-        file: 'ios/TestRNApp.xcodeproj/project.pbxproj',
+        file: normalizePath('ios/TestRNApp.xcodeproj/project.pbxproj'),
         item: 'CURRENT_PROJECT_VERSION',
         oldValue: '1',
         newValue: 2,
@@ -220,7 +225,7 @@ describe('iOS Version Updates', () => {
 
       expect(marketingVersionChange).toEqual({
         platform: 'iOS',
-        file: 'ios/TestRNApp.xcodeproj/project.pbxproj',
+        file: normalizePath('ios/TestRNApp.xcodeproj/project.pbxproj'),
         item: 'MARKETING_VERSION',
         oldValue: '1.0.0',
         newValue: '1.0.1',

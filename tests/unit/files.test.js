@@ -2,6 +2,11 @@ import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { resolveFilePaths } from '../../src/utils/files.js';
 import { createMockProject, createTempDir } from '../helpers/mockProject.js';
 
+// Add this helper function at the top of the file
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
 describe('File Path Resolution', () => {
   let tempDir, cleanup;
 
@@ -23,7 +28,7 @@ describe('File Path Resolution', () => {
       const resolved = resolveFilePaths(patterns, tempDir);
 
       expect(resolved).toHaveLength(1);
-      expect(resolved[0]).toMatch(/android\/app\/build\.gradle$/);
+      expect(normalizePath(resolved[0])).toMatch(/android\/app\/build\.gradle$/);
     });
 
     test('resolves multiple direct file paths', async () => {
@@ -33,8 +38,8 @@ describe('File Path Resolution', () => {
       const resolved = resolveFilePaths(patterns, tempDir);
 
       expect(resolved).toHaveLength(2);
-      expect(resolved[0]).toMatch(/android\/app\/build\.gradle$/);
-      expect(resolved[1]).toMatch(/android\/library\/build\.gradle$/);
+      expect(normalizePath(resolved[0])).toMatch(/android\/app\/build\.gradle$/);
+      expect(normalizePath(resolved[1])).toMatch(/android\/library\/build\.gradle$/);
     });
 
     test('resolves iOS xcodeproj glob pattern', async () => {
@@ -44,8 +49,8 @@ describe('File Path Resolution', () => {
       const resolved = resolveFilePaths(patterns, tempDir);
 
       expect(resolved).toHaveLength(1);
-      expect(resolved[0]).toMatch(/ios\/.*\.xcodeproj\/project\.pbxproj$/);
-      expect(resolved[0]).toMatch(/TestRNApp\.xcodeproj/);
+      expect(normalizePath(resolved[0])).toMatch(/ios\/.*\.xcodeproj\/project\.pbxproj$/);
+      expect(normalizePath(resolved[0])).toMatch(/TestRNApp\.xcodeproj/);
     });
 
     test('resolves multiple iOS xcodeproj files', async () => {
@@ -80,7 +85,7 @@ describe('File Path Resolution', () => {
       const resolved = resolveFilePaths(patterns, tempDir);
 
       expect(resolved).toHaveLength(1);
-      expect(resolved[0]).toMatch(/android\/app\/build\.gradle$/);
+      expect(normalizePath(resolved[0])).toMatch(/android\/app\/build\.gradle$/);
     });
 
     test('handles non-existent iOS directory gracefully', async () => {
@@ -159,7 +164,7 @@ describe('File Path Resolution', () => {
         const resolved = resolveFilePaths(patterns, tempDir);
 
         expect(resolved).toHaveLength(1);
-        expect(resolved[0]).toMatch(/build\.gradle$/);
+        expect(normalizePath(resolved[0])).toMatch(/build\.gradle$/);
       } finally {
         Object.defineProperty(process, 'platform', {
           value: originalPlatform,
@@ -183,7 +188,7 @@ describe('File Path Resolution', () => {
         const resolved = resolveFilePaths(patterns, tempDir);
 
         expect(resolved).toHaveLength(1);
-        expect(resolved[0]).toMatch(/build\.gradle$/);
+        expect(normalizePath(resolved[0])).toMatch(/build\.gradle$/);
       } finally {
         Object.defineProperty(process, 'platform', {
           value: originalPlatform,
@@ -228,7 +233,7 @@ describe('File Path Resolution', () => {
 
       // Should still resolve the valid pattern
       expect(resolved).toHaveLength(1);
-      expect(resolved[0]).toMatch(/build\.gradle$/);
+      expect(normalizePath(resolved[0])).toMatch(/build\.gradle$/);
     });
   });
 });

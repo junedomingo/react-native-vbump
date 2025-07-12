@@ -2,6 +2,11 @@ import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { updateAndroidVersions } from '../../src/utils/android.js';
 import { createMockProject, createTempDir, readFile } from '../helpers/mockProject.js';
 
+// Add this helper function at the top of the file
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
 describe('Android Version Updates', () => {
   let tempDir, cleanup;
 
@@ -219,7 +224,7 @@ describe('Android Version Updates', () => {
 
       expect(versionCodeChange).toEqual({
         platform: 'Android',
-        file: 'android/app/build.gradle',
+        file: normalizePath('android/app/build.gradle'),
         item: 'versionCode',
         oldValue: '1',
         newValue: 2,
@@ -227,7 +232,7 @@ describe('Android Version Updates', () => {
 
       expect(versionNameChange).toEqual({
         platform: 'Android',
-        file: 'android/app/build.gradle',
+        file: normalizePath('android/app/build.gradle'),
         item: 'versionName',
         oldValue: '1.0.0',
         newValue: '1.0.1',
