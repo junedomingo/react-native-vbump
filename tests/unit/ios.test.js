@@ -225,7 +225,7 @@ describe('iOS Version Updates', () => {
 
       expect(normalizeChange(currentProjectVersionChange)).toEqual({
         platform: 'iOS',
-        file: normalizePath(currentProjectVersionChange.file), // Normalize the actual received value
+        file: 'ios/TestRNApp.xcodeproj/project.pbxproj',
         item: 'CURRENT_PROJECT_VERSION',
         oldValue: '1',
         newValue: 2,
@@ -233,7 +233,7 @@ describe('iOS Version Updates', () => {
 
       expect(normalizeChange(marketingVersionChange)).toEqual({
         platform: 'iOS',
-        file: normalizePath(marketingVersionChange.file), // Normalize the actual received value
+        file: 'ios/TestRNApp.xcodeproj/project.pbxproj',
         item: 'MARKETING_VERSION',
         oldValue: '1.0.0',
         newValue: '1.0.1',
@@ -335,7 +335,7 @@ describe('iOS Version Updates', () => {
         projectRoot: tempDir,
         changes: [],
         increment: 'minor',
-        packageJsonPath: packageJsonPath,
+        packageJsonPath,
         packageJsonUpdated: true, // already updated
       };
 

@@ -7,6 +7,14 @@ function normalizePath(filePath) {
   return filePath.replace(/\\/g, '/');
 }
 
+// Add this helper function
+function normalizeChange(change) {
+  return {
+    ...change,
+    file: normalizePath(change.file),
+  };
+}
+
 describe('Android Version Updates', () => {
   let tempDir, cleanup;
 
@@ -222,17 +230,17 @@ describe('Android Version Updates', () => {
       const versionCodeChange = options.changes.find((c) => c.item === 'versionCode');
       const versionNameChange = options.changes.find((c) => c.item === 'versionName');
 
-      expect(versionCodeChange).toEqual({
+      expect(normalizeChange(versionCodeChange)).toEqual({
         platform: 'Android',
-        file: normalizePath(versionCodeChange.file), // Normalize the actual received value
+        file: 'android/app/build.gradle',
         item: 'versionCode',
         oldValue: '1',
         newValue: 2,
       });
 
-      expect(versionNameChange).toEqual({
+      expect(normalizeChange(versionNameChange)).toEqual({
         platform: 'Android',
-        file: normalizePath(versionNameChange.file), // Normalize the actual received value
+        file: 'android/app/build.gradle',
         item: 'versionName',
         oldValue: '1.0.0',
         newValue: '1.0.1',
@@ -304,7 +312,7 @@ describe('Android Version Updates', () => {
         projectRoot: tempDir,
         changes: [],
         increment: 'minor',
-        packageJsonPath: packageJsonPath,
+        packageJsonPath,
         packageJsonUpdated: false,
       };
 
@@ -334,7 +342,7 @@ describe('Android Version Updates', () => {
         projectRoot: tempDir,
         changes: [],
         increment: 'minor',
-        packageJsonPath: packageJsonPath,
+        packageJsonPath,
         packageJsonUpdated: true, // already updated
       };
 
