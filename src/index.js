@@ -1,18 +1,22 @@
 import { Command } from 'commander';
 import path from 'path';
+import fs from 'fs';
 import chalk from 'chalk';
 import { detectReactNativeProject, loadProjectConfiguration } from './utils/detection.js';
 import { resolveFilePaths } from './utils/files.js';
-import { handleUserCancellation, displayResults, showNextSteps } from './utils/ui.js';
+import { parsePackageJsonVersion, updatePackageJsonVersion } from './utils/packageJson.js';
 import { updateAndroidVersions } from './utils/android.js';
 import { updateIOSVersions } from './utils/ios.js';
-import { updatePackageJsonVersion, parsePackageJsonVersion } from './utils/packageJson.js';
+import { handleUserCancellation, displayResults, showNextSteps } from './utils/ui.js';
 import {
   promptForPlatformSelection,
   promptForIncrementType,
   promptForConfirmation,
 } from './utils/prompts.js';
-import packageJson from '../package.json' with { type: 'json' };
+
+// Load package.json
+const packageJsonPath = new URL('../package.json', import.meta.url);
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
 const program = new Command();
 
