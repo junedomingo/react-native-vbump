@@ -72,7 +72,7 @@ async function executeVersionBump(userOptions) {
 
     if (androidFiles.length === 0 && iosFiles.length === 0) {
       console.error(chalk.red.bold('❌ Error:'), chalk.red('No Android or iOS files found.'));
-      console.log(chalk.gray('Check your file paths or create a version-up.config.js file.'));
+      console.log(chalk.gray('Check your file paths or create a vbump.config.js file.'));
       process.exit(1);
     }
 

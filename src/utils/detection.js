@@ -86,10 +86,10 @@ export async function loadProjectConfiguration(projectRoot, customConfigPath = n
 
   // Search for standard config files
   const configFiles = [
-    'version-up.config.js',
-    'version-up.config.json',
-    '.version-up.config.js',
-    '.version-up.config.json',
+    'vbump.config.js',
+    'vbump.config.json',
+    '.vbump.config.js',
+    '.vbump.config.json',
   ];
 
   for (const configFile of configFiles) {

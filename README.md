@@ -57,7 +57,7 @@ The tool provides an interactive mode with professional prompts:
 
 ## ⚙️ Configuration (Optional)
 
-The tool works out-of-the-box with standard React Native projects. Optionally, create a `version-up.config.js` file in your project root to customize file paths:
+The tool works out-of-the-box with standard React Native projects. Optionally, create a `vbump.config.js` file in your project root to customize file paths:
 
 ```javascript
 export default {
@@ -82,10 +82,10 @@ export default {
 ```
 
 Supported config file names:
-- `version-up.config.js`
-- `version-up.config.json`
-- `.version-up.config.js`
-- `.version-up.config.json`
+- `vbump.config.js`
+- `vbump.config.json`
+- `.vbump.config.js`
+- `.vbump.config.json`
 
 ## 🎯 Auto-Detection
 
