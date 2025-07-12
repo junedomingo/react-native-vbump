@@ -6,13 +6,13 @@ import { resolveFilePaths } from './utils/files.js';
 import { handleUserCancellation, displayResults, showNextSteps } from './utils/ui.js';
 import { updateAndroidVersions } from './utils/android.js';
 import { updateIOSVersions } from './utils/ios.js';
-import { updatePackageJsonVersion } from './utils/packageJson.js';
+import { updatePackageJsonVersion, parsePackageJsonVersion } from './utils/packageJson.js';
 import {
   promptForPlatformSelection,
   promptForIncrementType,
   promptForConfirmation,
 } from './utils/prompts.js';
-import { version } from '../package.json';
+import packageJson from '../package.json' with { type: 'json' };
 
 const program = new Command();
 
@@ -162,7 +162,23 @@ async function determineIncrementType(options, platforms) {
   // Show prompt if we're updating app versions (even in dry-run mode)
   if (updatingAppVersions) {
     try {
-      return await promptForIncrementType();
+      // Get current version from package.json to show in prompt examples
+      let currentVersion = '0.1.0'; // fallback
+      try {
+        if (options.packageJsonPath) {
+          const packageVersionInfo = parsePackageJsonVersion(options.packageJsonPath);
+          if (packageVersionInfo.version) {
+            currentVersion = packageVersionInfo.version;
+          }
+        }
+      } catch (error) {
+        // Use fallback version if package.json can't be read
+        console.log(
+          chalk.gray('⚠️  Could not read current version from package.json, using generic examples')
+        );
+      }
+
+      return await promptForIncrementType(currentVersion);
     } catch (error) {
       handleUserCancellation(error);
       throw error;
@@ -279,7 +295,7 @@ function setupCliProgram() {
   program
     .name('react-native-vbump')
     .description('A CLI tool to bump version numbers for React Native Android and iOS projects')
-    .version(version)
+    .version(packageJson.version)
     .option(
       '-p, --project-path <path>',
       'path to React Native project (auto-detected if not specified)'
