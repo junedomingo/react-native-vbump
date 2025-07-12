@@ -1,4 +1,5 @@
-export default {
+module.exports = {
+  preset: null,
   testEnvironment: 'node',
   transform: {},
   testMatch: ['<rootDir>/tests/**/*.test.js'],
@@ -17,7 +18,6 @@ export default {
   },
   setupFilesAfterEnv: ['<rootDir>/tests/helpers/setup.js'],
   testTimeout: 30000,
-  // Handle ES module imports properly
   moduleFileExtensions: ['js', 'json'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/tests/'],
