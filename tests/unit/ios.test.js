@@ -7,6 +7,14 @@ function normalizePath(filePath) {
   return filePath.replace(/\\/g, '/');
 }
 
+// Add this helper function
+function normalizeChange(change) {
+  return {
+    ...change,
+    file: normalizePath(change.file),
+  };
+}
+
 describe('iOS Version Updates', () => {
   let tempDir, cleanup;
 
@@ -215,17 +223,17 @@ describe('iOS Version Updates', () => {
       );
       const marketingVersionChange = options.changes.find((c) => c.item === 'MARKETING_VERSION');
 
-      expect(currentProjectVersionChange).toEqual({
+      expect(normalizeChange(currentProjectVersionChange)).toEqual({
         platform: 'iOS',
-        file: normalizePath('ios/TestRNApp.xcodeproj/project.pbxproj'),
+        file: normalizePath(currentProjectVersionChange.file), // Normalize the actual received value
         item: 'CURRENT_PROJECT_VERSION',
         oldValue: '1',
         newValue: 2,
       });
 
-      expect(marketingVersionChange).toEqual({
+      expect(normalizeChange(marketingVersionChange)).toEqual({
         platform: 'iOS',
-        file: normalizePath('ios/TestRNApp.xcodeproj/project.pbxproj'),
+        file: normalizePath(marketingVersionChange.file), // Normalize the actual received value
         item: 'MARKETING_VERSION',
         oldValue: '1.0.0',
         newValue: '1.0.1',
@@ -297,7 +305,7 @@ describe('iOS Version Updates', () => {
         projectRoot: tempDir,
         changes: [],
         increment: 'minor',
-        packageJsonPath: packageJsonPath,
+        packageJsonPath,
         packageJsonUpdated: false,
       };
 

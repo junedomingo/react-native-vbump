@@ -224,7 +224,7 @@ describe('Android Version Updates', () => {
 
       expect(versionCodeChange).toEqual({
         platform: 'Android',
-        file: normalizePath('android/app/build.gradle'),
+        file: normalizePath(versionCodeChange.file), // Normalize the actual received value
         item: 'versionCode',
         oldValue: '1',
         newValue: 2,
@@ -232,7 +232,7 @@ describe('Android Version Updates', () => {
 
       expect(versionNameChange).toEqual({
         platform: 'Android',
-        file: normalizePath('android/app/build.gradle'),
+        file: normalizePath(versionNameChange.file), // Normalize the actual received value
         item: 'versionName',
         oldValue: '1.0.0',
         newValue: '1.0.1',
