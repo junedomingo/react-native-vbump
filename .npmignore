@@ -1,0 +1,63 @@
+# Source code (will be built to dist/)
+src/
+
+# Test files
+*.test.js
+*.spec.js
+test/
+tests/
+__tests__/
+jest.config.js
+jest.setup.js
+integration.test.js
+index.test.js
+
+# Test documentation
+TEST_README.md
+TESTING_SUMMARY.md
+
+# Development configuration
+version-up.config.js
+.vscode/
+.vscode-test/
+
+# Development dependencies and build artifacts
+node_modules/
+package-lock.json
+
+# Git files
+.git/
+.gitignore
+
+# Coverage and test reports
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.*
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

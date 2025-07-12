@@ -1,0 +1,65 @@
+{
+  "name": "react-native-vbump",
+  "version": "0.1.0",
+  "description": "A CLI tool to automatically increment version numbers for React Native projects",
+  "license": "MIT",
+  "author": "June Domingo <june.domingo@gmail.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "react-native-vbump": "dist/index.js",
+    "rnvb": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "package.json"
+  ],
+  "keywords": [
+    "react-native",
+    "version",
+    "bump",
+    "android",
+    "ios",
+    "cli",
+    "automation",
+    "versioning",
+    "build-tools"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "esbuild src/index.js --bundle --platform=node --target=node16 --format=esm --outfile=dist/index.js --banner:js=\"#!/usr/bin/env node\" --external:inquirer --external:chalk --external:cli-table3 --external:commander",
+    "dev": "tsx src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.0",
+    "inquirer": "^12.7.0"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "esbuild": "^0.19.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "tsx": "^4.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/react-native-version-up.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/react-native-version-up/issues"
+  },
+  "homepage": "https://github.com/yourusername/react-native-version-up#readme"
+}
