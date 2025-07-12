@@ -1,0 +1,201 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [16.x, 18.x, 20.x]
+        # Test fewer combinations to reduce CI time
+        exclude:
+          - os: windows-latest
+            node-version: 16.x
+          - os: macos-latest
+            node-version: 16.x
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linter
+      run: npm run lint
+
+    - name: Run unit tests
+      run: npm run test:coverage
+
+    - name: Test CLI build
+      run: |
+        npm run build
+        node dist/index.js --help
+
+    - name: Test CLI version
+      run: node dist/index.js --version
+
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  integration-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [20.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build CLI
+      run: npm run build
+
+    - name: Run integration tests
+      run: npm run test -- tests/integration/
+
+    - name: Test CLI in real scenarios (Ubuntu/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        # Create a temporary React Native project structure
+        mkdir -p temp-rn-project/android/app
+        mkdir -p temp-rn-project/ios/TestApp.xcodeproj
+
+        # Create package.json
+        cat > temp-rn-project/package.json << 'EOF'
+        {
+          "name": "temp-rn-project",
+          "version": "1.0.0",
+          "private": true,
+          "dependencies": {
+            "react": "18.2.0",
+            "react-native": "0.73.0"
+          }
+        }
+        EOF
+
+        # Create Android build.gradle
+        cat > temp-rn-project/android/app/build.gradle << 'EOF'
+        android {
+            defaultConfig {
+                versionCode 1
+                versionName "1.0.0"
+            }
+        }
+        EOF
+
+        # Create iOS project.pbxproj
+        cat > temp-rn-project/ios/TestApp.xcodeproj/project.pbxproj << 'EOF'
+        {
+          buildSettings = {
+            CURRENT_PROJECT_VERSION = 1;
+            MARKETING_VERSION = 1.0.0;
+          };
+        }
+        EOF
+
+        # Test CLI commands
+        cd temp-rn-project
+        node ../dist/index.js --dry-run --android --increment patch
+        node ../dist/index.js --dry-run --ios --increment minor
+        node ../dist/index.js --dry-run --build-numbers
+
+        # Clean up
+        cd ..
+        rm -rf temp-rn-project
+
+    - name: Test CLI in real scenarios (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        # Create a temporary React Native project structure
+        mkdir temp-rn-project\android\app
+        mkdir temp-rn-project\ios\TestApp.xcodeproj
+
+        # Create package.json
+        echo '{"name":"temp-rn-project","version":"1.0.0","private":true,"dependencies":{"react":"18.2.0","react-native":"0.73.0"}}' > temp-rn-project\package.json
+
+        # Create Android build.gradle
+        echo 'android { defaultConfig { versionCode 1; versionName "1.0.0" } }' > temp-rn-project\android\app\build.gradle
+
+        # Create iOS project.pbxproj
+        echo '{ buildSettings = { CURRENT_PROJECT_VERSION = 1; MARKETING_VERSION = 1.0.0; }; }' > temp-rn-project\ios\TestApp.xcodeproj\project.pbxproj
+
+        # Test CLI commands
+        cd temp-rn-project
+        node ..\dist\index.js --dry-run --android --increment patch
+        node ..\dist\index.js --dry-run --ios --increment minor
+        node ..\dist\index.js --dry-run --build-numbers
+
+        # Clean up
+        cd ..
+        rmdir /s /q temp-rn-project
+
+  publish-test:
+    runs-on: ubuntu-latest
+    needs: [test, integration-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build for production
+      run: npm run build
+
+    - name: Test package installation
+      run: |
+        # Pack the package
+        npm pack
+
+        # Create a test directory
+        mkdir test-install
+        cd test-install
+
+        # Install the packed package
+        npm init -y
+        npm install ../react-native-vbump-*.tgz
+
+        # Test the installed package
+        npx react-native-vbump --version
+
+        # Clean up
+        cd ..
+        rm -rf test-install
+        rm react-native-vbump-*.tgz

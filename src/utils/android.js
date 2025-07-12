@@ -59,14 +59,23 @@ async function processAndroidFile(filePath, versionCode, versionName, options) {
   );
 
   // Calculate new version values
-  const newVersionCode = calculateNewBuildNumber(versionCode, currentVersionCode);
+  const newVersionCode =
+    versionCode !== null
+      ? calculateNewBuildNumber(versionCode, currentVersionCode)
+      : parseInt(currentVersionCode);
   const newVersionName =
     versionName !== null
       ? calculateNewSemanticVersion(versionName, currentVersionName, options.increment || 'patch')
       : currentVersionName;
 
   // Update file content with new versions
-  content = updateAndroidFileContent(content, newVersionCode, newVersionName, versionName !== null);
+  content = updateAndroidFileContent(
+    content,
+    newVersionCode,
+    newVersionName,
+    versionCode !== null,
+    versionName !== null
+  );
 
   // Write updated content back to file (unless dry run)
   if (!options.dryRun) {
@@ -80,6 +89,7 @@ async function processAndroidFile(filePath, versionCode, versionName, options) {
     newVersionCode,
     currentVersionName,
     newVersionName,
+    versionCode !== null,
     versionName !== null,
     options
   );
@@ -103,12 +113,21 @@ async function processAndroidFile(filePath, versionCode, versionName, options) {
  * @param {string} content - Original file content
  * @param {number} newVersionCode - New version code value
  * @param {string} newVersionName - New version name value
+ * @param {boolean} updateVersionCode - Whether to update versionCode
  * @param {boolean} updateVersionName - Whether to update versionName
  * @returns {string} Updated file content
  */
-function updateAndroidFileContent(content, newVersionCode, newVersionName, updateVersionName) {
+function updateAndroidFileContent(
+  content,
+  newVersionCode,
+  newVersionName,
+  updateVersionCode,
+  updateVersionName
+) {
   // Always update versionCode
-  content = content.replace(/versionCode\s+\d+/, `versionCode ${newVersionCode}`);
+  if (updateVersionCode) {
+    content = content.replace(/versionCode\s+\d+/, `versionCode ${newVersionCode}`);
+  }
 
   // Update versionName only if requested
   if (updateVersionName) {
@@ -126,6 +145,7 @@ function updateAndroidFileContent(content, newVersionCode, newVersionName, updat
  * @param {number} newVersionCode - New version code
  * @param {string} oldVersionName - Previous version name
  * @param {string} newVersionName - New version name
+ * @param {boolean} versionCodeUpdated - Whether version code was actually updated
  * @param {boolean} versionNameUpdated - Whether version name was actually updated
  * @param {Object} options - Configuration options containing changes array
  */
@@ -135,19 +155,22 @@ function recordAndroidChanges(
   newVersionCode,
   oldVersionName,
   newVersionName,
+  versionCodeUpdated,
   versionNameUpdated,
   options
 ) {
   options.changes = options.changes || [];
 
   // Always record versionCode changes
-  options.changes.push({
-    platform: 'Android',
-    file: path.relative(options.projectRoot || process.cwd(), filePath),
-    item: 'versionCode',
-    oldValue: oldVersionCode,
-    newValue: newVersionCode,
-  });
+  if (versionCodeUpdated) {
+    options.changes.push({
+      platform: 'Android',
+      file: path.relative(options.projectRoot || process.cwd(), filePath),
+      item: 'versionCode',
+      oldValue: oldVersionCode,
+      newValue: newVersionCode,
+    });
+  }
 
   // Record versionName changes only if it was updated
   if (versionNameUpdated) {

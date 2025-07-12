@@ -32,7 +32,7 @@
   "scripts": {
     "build": "esbuild src/index.js --bundle --platform=node --target=node16 --format=esm --outfile=dist/index.js --banner:js=\"#!/usr/bin/env node\" --external:inquirer --external:chalk --external:cli-table3 --external:commander",
     "dev": "tsx src/index.js",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:verbose": "jest --verbose",

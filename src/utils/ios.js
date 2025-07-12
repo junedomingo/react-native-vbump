@@ -68,10 +68,10 @@ async function processIOSFile(filePath, currentProjectVersion, marketingVersion,
   );
 
   // Calculate new version values
-  const newCurrentProjectVersion = calculateNewBuildNumber(
-    currentProjectVersion,
-    currentProjectVersionValue
-  );
+  const newCurrentProjectVersion =
+    currentProjectVersion !== null
+      ? calculateNewBuildNumber(currentProjectVersion, currentProjectVersionValue)
+      : parseInt(currentProjectVersionValue);
   const newMarketingVersion =
     marketingVersion !== null
       ? calculateNewSemanticVersion(
@@ -86,6 +86,7 @@ async function processIOSFile(filePath, currentProjectVersion, marketingVersion,
     content,
     newCurrentProjectVersion,
     newMarketingVersion,
+    currentProjectVersion !== null,
     marketingVersion !== null
   );
 
@@ -101,6 +102,7 @@ async function processIOSFile(filePath, currentProjectVersion, marketingVersion,
     newCurrentProjectVersion,
     marketingVersionValue,
     newMarketingVersion,
+    currentProjectVersion !== null,
     marketingVersion !== null,
     options
   );
@@ -125,6 +127,7 @@ async function processIOSFile(filePath, currentProjectVersion, marketingVersion,
  * @param {string} content - Original file content
  * @param {number} newCurrentProjectVersion - New current project version value
  * @param {string} newMarketingVersion - New marketing version value
+ * @param {boolean} updateCurrentProjectVersion - Whether to update CURRENT_PROJECT_VERSION
  * @param {boolean} updateMarketingVersion - Whether to update MARKETING_VERSION
  * @returns {string} Updated file content
  */
@@ -132,13 +135,16 @@ function updateIOSFileContent(
   content,
   newCurrentProjectVersion,
   newMarketingVersion,
+  updateCurrentProjectVersion,
   updateMarketingVersion
 ) {
-  // Always update CURRENT_PROJECT_VERSION (all occurrences)
-  content = content.replace(
-    /CURRENT_PROJECT_VERSION = \d+;/g,
-    `CURRENT_PROJECT_VERSION = ${newCurrentProjectVersion};`
-  );
+  // Update CURRENT_PROJECT_VERSION only if requested (all occurrences)
+  if (updateCurrentProjectVersion) {
+    content = content.replace(
+      /CURRENT_PROJECT_VERSION = \d+;/g,
+      `CURRENT_PROJECT_VERSION = ${newCurrentProjectVersion};`
+    );
+  }
 
   // Update MARKETING_VERSION only if requested (all occurrences)
   if (updateMarketingVersion) {
@@ -159,6 +165,7 @@ function updateIOSFileContent(
  * @param {number} newCurrentProjectVersion - New current project version
  * @param {string} oldMarketingVersion - Previous marketing version
  * @param {string} newMarketingVersion - New marketing version
+ * @param {boolean} currentProjectVersionUpdated - Whether current project version was actually updated
  * @param {boolean} marketingVersionUpdated - Whether marketing version was actually updated
  * @param {Object} options - Configuration options containing changes array
  */
@@ -168,19 +175,22 @@ function recordIOSChanges(
   newCurrentProjectVersion,
   oldMarketingVersion,
   newMarketingVersion,
+  currentProjectVersionUpdated,
   marketingVersionUpdated,
   options
 ) {
   options.changes = options.changes || [];
 
-  // Always record CURRENT_PROJECT_VERSION changes
-  options.changes.push({
-    platform: 'iOS',
-    file: path.relative(options.projectRoot || process.cwd(), filePath),
-    item: 'CURRENT_PROJECT_VERSION',
-    oldValue: oldCurrentProjectVersion,
-    newValue: newCurrentProjectVersion,
-  });
+  // Record CURRENT_PROJECT_VERSION changes only if it was updated
+  if (currentProjectVersionUpdated) {
+    options.changes.push({
+      platform: 'iOS',
+      file: path.relative(options.projectRoot || process.cwd(), filePath),
+      item: 'CURRENT_PROJECT_VERSION',
+      oldValue: oldCurrentProjectVersion,
+      newValue: newCurrentProjectVersion,
+    });
+  }
 
   // Record MARKETING_VERSION changes only if it was updated
   if (marketingVersionUpdated) {

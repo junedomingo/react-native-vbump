@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
+import { pathToFileURL } from 'url';
 
 // Default configuration for React Native projects
 const DEFAULT_CONFIG = {
@@ -76,31 +77,39 @@ function hasReactNativeDependencies(packageJson) {
  * @returns {Object} Configuration object with android, ios, and packageJson settings
  */
 export async function loadProjectConfiguration(projectRoot, customConfigPath = null) {
-  // If custom config path provided, try to load it first
-  if (customConfigPath) {
-    const config = await loadConfigFromPath(customConfigPath);
-    if (config) {
-      return { ...DEFAULT_CONFIG, ...config };
+  try {
+    // If custom config path provided, try to load it first
+    if (customConfigPath) {
+      const config = await loadConfigFromPath(customConfigPath);
+      if (config) {
+        return mergeConfigs(DEFAULT_CONFIG, config);
+      }
     }
-  }
 
-  // Search for standard config files
-  const configFiles = [
-    'vbump.config.js',
-    'vbump.config.json',
-    '.vbump.config.js',
-    '.vbump.config.json',
-  ];
+    // Search for standard config files
+    const configFiles = [
+      'vbump.config.js',
+      'vbump.config.json',
+      '.vbump.config.js',
+      '.vbump.config.json',
+    ];
 
-  for (const configFile of configFiles) {
-    const configPath = path.join(projectRoot, configFile);
-    const config = await loadConfigFromPath(configPath);
-    if (config) {
-      return { ...DEFAULT_CONFIG, ...config };
+    for (const configFile of configFiles) {
+      const configPath = path.join(projectRoot, configFile);
+      const config = await loadConfigFromPath(configPath);
+      if (config) {
+        return mergeConfigs(DEFAULT_CONFIG, config);
+      }
     }
-  }
 
-  return DEFAULT_CONFIG;
+    return getDefaultConfig();
+  } catch (error) {
+    // If any error occurs during configuration loading, fall back to default
+    console.warn(
+      chalk.yellow(`Warning: Error loading configuration, using defaults: ${error.message}`)
+    );
+    return getDefaultConfig();
+  }
 }
 
 /**
@@ -115,15 +124,29 @@ async function loadConfigFromPath(configPath) {
   }
 
   try {
+    let config;
     if (configPath.endsWith('.js')) {
-      // For ES modules, use dynamic import
-      const configModule = await import(configPath);
-      return configModule.default;
+      // For ES modules, use dynamic import with file URL
+      const configUrl = pathToFileURL(configPath).href;
+      const configModule = await import(configUrl);
+      config = configModule.default;
     } else {
       // For JSON files, read and parse
       const configContent = fs.readFileSync(configPath, 'utf8');
-      return JSON.parse(configContent);
+      config = JSON.parse(configContent);
     }
+
+    // Validate that the loaded config is a valid configuration object
+    if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+      console.warn(
+        chalk.yellow(
+          `Warning: Invalid configuration in ${path.basename(configPath)}: must be an object`
+        )
+      );
+      return null;
+    }
+
+    return config;
   } catch (error) {
     console.warn(
       chalk.yellow(
@@ -135,10 +158,52 @@ async function loadConfigFromPath(configPath) {
 }
 
 /**
+ * Deep merge two configuration objects
+ * @param {Object} defaultConfig - Default configuration
+ * @param {Object} userConfig - User configuration
+ * @returns {Object} Merged configuration
+ */
+function mergeConfigs(defaultConfig, userConfig) {
+  const result = {};
+
+  // Merge each top-level key
+  for (const key in defaultConfig) {
+    if (userConfig[key] && typeof userConfig[key] === 'object' && !Array.isArray(userConfig[key])) {
+      result[key] = { ...defaultConfig[key], ...userConfig[key] };
+    } else if (userConfig[key] !== undefined) {
+      result[key] = userConfig[key];
+    } else {
+      result[key] = Array.isArray(defaultConfig[key])
+        ? [...defaultConfig[key]]
+        : typeof defaultConfig[key] === 'object'
+          ? { ...defaultConfig[key] }
+          : defaultConfig[key];
+    }
+  }
+
+  // Add any keys that exist in userConfig but not in defaultConfig
+  for (const key in userConfig) {
+    if (!(key in defaultConfig)) {
+      result[key] = userConfig[key];
+    }
+  }
+
+  return result;
+}
+
+/**
  * Get default configuration object
  * Utility function to access default settings
- * @returns {Object} Default configuration
+ * @returns {Object} Default configuration (deep copy)
  */
 export function getDefaultConfig() {
-  return { ...DEFAULT_CONFIG };
+  return {
+    android: {
+      files: [...DEFAULT_CONFIG.android.files],
+    },
+    ios: {
+      files: [...DEFAULT_CONFIG.ios.files],
+    },
+    packageJson: DEFAULT_CONFIG.packageJson,
+  };
 }
