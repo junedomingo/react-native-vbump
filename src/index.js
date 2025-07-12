@@ -4,7 +4,7 @@ import fs from 'fs';
 import chalk from 'chalk';
 import { detectReactNativeProject, loadProjectConfiguration } from './utils/detection.js';
 import { resolveFilePaths } from './utils/files.js';
-import { parsePackageJsonVersion, updatePackageJsonVersion } from './utils/packageJson.js';
+import { parsePackageJsonVersion } from './utils/packageJson.js';
 import { updateAndroidVersions } from './utils/android.js';
 import { updateIOSVersions } from './utils/ios.js';
 import { handleUserCancellation, displayResults, showNextSteps } from './utils/ui.js';
