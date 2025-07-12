@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import { incrementSemanticVersion } from './version.js';
 
 /**
  * Prompt user to select which platforms to update
@@ -48,10 +49,25 @@ export async function promptForPlatformSelection() {
 
 /**
  * Prompt user to select version increment type
- * Provides clear examples of what each increment type does
+ * Provides clear examples of what each increment type does based on current version
+ * @param {string} currentVersion - Current version to use for examples (fallback to generic if not provided)
  * @returns {string} Selected increment type
  */
-export async function promptForIncrementType() {
+export async function promptForIncrementType(currentVersion = '2.12.0') {
+  // Generate dynamic examples based on current version
+  let patchExample, minorExample, majorExample;
+
+  try {
+    patchExample = `${currentVersion} → ${incrementSemanticVersion(currentVersion, 'patch')}`;
+    minorExample = `${currentVersion} → ${incrementSemanticVersion(currentVersion, 'minor')}`;
+    majorExample = `${currentVersion} → ${incrementSemanticVersion(currentVersion, 'major')}`;
+  } catch (error) {
+    // Fallback to generic examples if current version is invalid
+    patchExample = '2.12.0 → 2.12.1';
+    minorExample = '2.12.0 → 2.13.0';
+    majorExample = '2.12.0 → 3.0.0';
+  }
+
   const incrementAnswer = await inquirer.prompt([
     {
       type: 'list',
@@ -59,15 +75,15 @@ export async function promptForIncrementType() {
       message: chalk.white.bold('What type of version increment?'),
       choices: [
         {
-          name: `🔧 Patch (2.12.0 → 2.12.1) - Bug fixes`,
+          name: `🔧 Patch (${patchExample}) - Bug fixes`,
           value: 'patch',
         },
         {
-          name: `⬆️  Minor (2.12.0 → 2.13.0) - New features`,
+          name: `⬆️  Minor (${minorExample}) - New features`,
           value: 'minor',
         },
         {
-          name: `🚀 Major (2.12.0 → 3.0.0) - Breaking changes`,
+          name: `🚀 Major (${majorExample}) - Breaking changes`,
           value: 'major',
         },
       ],

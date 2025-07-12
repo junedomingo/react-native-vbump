@@ -1,6 +1,6 @@
 {
   "name": "react-native-vbump",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A CLI tool to automatically increment version numbers for React Native projects",
   "license": "MIT",
   "author": "June Domingo <june.domingo@gmail.com>",
