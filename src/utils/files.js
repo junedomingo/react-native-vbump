@@ -51,7 +51,7 @@ function resolveGlobPattern(pattern, projectRoot) {
     // Extract the directory part before the glob (e.g., "ios" from "ios/*.xcodeproj/project.pbxproj")
     const patternParts = pattern.split('*');
     const dirPart = patternParts[0]; // "ios/"
-    const filePart = patternParts[1]; // ".xcodeproj/project.pbxproj"
+    // const filePart = patternParts[1]; // ".xcodeproj/project.pbxproj"
 
     const searchDir = path.join(projectRoot, dirPart);
 
