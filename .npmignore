@@ -17,7 +17,7 @@ TEST_README.md
 TESTING_SUMMARY.md
 
 # Development configuration
-version-up.config.js
+vbump.config.js
 .vscode/
 .vscode-test/
 
