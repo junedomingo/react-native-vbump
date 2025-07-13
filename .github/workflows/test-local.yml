@@ -1,0 +1,90 @@
+name: Local Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-local:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linter
+      run: npm run lint
+
+    - name: Run unit tests
+      run: npm run test:coverage
+
+    - name: Test CLI build
+      run: |
+        npm run build
+        node dist/index.js --help
+
+    - name: Test CLI version
+      run: node dist/index.js --version
+
+    - name: Run integration tests
+      run: npm run test -- tests/integration/
+
+    - name: Test CLI in real scenarios
+      run: |
+        # Create a temporary React Native project structure
+        mkdir -p temp-rn-project/android/app
+        mkdir -p temp-rn-project/ios/TestApp.xcodeproj
+
+        # Create package.json
+        cat > temp-rn-project/package.json << 'EOF'
+        {
+          "name": "temp-rn-project",
+          "version": "1.0.0",
+          "private": true,
+          "dependencies": {
+            "react": "18.2.0",
+            "react-native": "0.73.0"
+          }
+        }
+        EOF
+
+        # Create Android build.gradle
+        cat > temp-rn-project/android/app/build.gradle << 'EOF'
+        android {
+            defaultConfig {
+                versionCode 1
+                versionName "1.0.0"
+            }
+        }
+        EOF
+
+        # Create iOS project.pbxproj
+        cat > temp-rn-project/ios/TestApp.xcodeproj/project.pbxproj << 'EOF'
+        {
+          buildSettings = {
+            CURRENT_PROJECT_VERSION = 1;
+            MARKETING_VERSION = 1.0.0;
+          };
+        }
+        EOF
+
+        # Test CLI commands
+        cd temp-rn-project
+        node ../dist/index.js --dry-run --android --increment patch
+        node ../dist/index.js --dry-run --ios --increment minor
+        node ../dist/index.js --dry-run --build-numbers
+
+        # Clean up
+        cd ..
+        rm -rf temp-rn-project

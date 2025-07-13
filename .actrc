@@ -1,0 +1,5 @@
+--container-architecture linux/amd64
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+# Using Ubuntu for Windows testing since Windows containers aren't readily available for act
+-P windows-latest=catthehacker/ubuntu:act-latest
+-P macos-latest=catthehacker/ubuntu:act-latest
