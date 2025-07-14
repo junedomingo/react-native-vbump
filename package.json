@@ -1,6 +1,6 @@
 {
   "name": "react-native-vbump",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A CLI tool to automatically increment version numbers for React Native projects",
   "license": "MIT",
   "author": "June Domingo <june.domingo@gmail.com>",
@@ -58,10 +58,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/react-native-version-up.git"
+    "url": "https://github.com/junedomingo/react-native-vbump.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/react-native-version-up/issues"
+    "url": "https://github.com/junedomingo/react-native-vbump/issues"
   },
-  "homepage": "https://github.com/yourusername/react-native-version-up#readme"
+  "homepage": "https://github.com/junedomingo/react-native-vbump#readme"
 }

@@ -185,7 +185,7 @@ npm test
 
 ## 📦 Requirements
 
-- **Node.js**: 16.0.0 or higher
+- **Node.js**: 20.0.0 or higher
 - **React Native project** with standard structure
 - **Platform files**: `android/app/build.gradle` and/or `ios/*.xcodeproj/project.pbxproj`
 
