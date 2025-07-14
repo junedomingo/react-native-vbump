@@ -58,10 +58,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/react-native-version-up.git"
+    "url": "https://github.com/junedomingo/react-native-vbump.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/react-native-version-up/issues"
+    "url": "https://github.com/junedomingo/react-native-vbump/issues"
   },
-  "homepage": "https://github.com/yourusername/react-native-version-up#readme"
+  "homepage": "https://github.com/junedomingo/react-native-vbump#readme"
 }
